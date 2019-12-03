@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -14,6 +14,7 @@
 
 # Mira implementation
 import util
+import math
 PRINT = True
 
 class MiraClassifier:
@@ -50,6 +51,18 @@ class MiraClassifier:
 
         return self.trainAndTune(trainingData, trainingLabels, validationData, validationLabels, Cgrid)
 
+    def newTao(self, incWeight, correctWeight, feature ):
+        deltaWeight = incWeight-correctWeight
+        newDeltaWeight = deltaWeight*feature +1.0
+        divisor = math.sqrt(feature*feature)*2.0
+        return newDeltaWeight/divisor
+
+    def multCounter(self, num, count):
+        newCounter = count.copy()
+        for  i in count.keys():
+            newCounter[i] = count[i] *num
+        return newCounter
+
     def trainAndTune(self, trainingData, trainingLabels, validationData, validationLabels, Cgrid):
         """
         This method sets self.weights using MIRA.  Train the classifier for each value of C in Cgrid,
@@ -61,7 +74,48 @@ class MiraClassifier:
         representing a vector of values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        evals = 0
+        bestWeight = {}
+        bestValidation = -1
+        print(list(Cgrid))
+        newWeights = self.weights.copy()
+        for c in Cgrid:
+            self.weights = newWeights.copy()
+            #self.initializeWeightsToZero()
+            #errors = []
+            for iteration in range(self.max_iterations):
+                for i in range(len(trainingData)):
+                    maxLabel = -1
+                    maxValue = float("-inf")
+                    for label in self.legalLabels:
+                        #Score (activacion) de la clase
+                        value = trainingData[i]*self.weights[label]
+                        if value > maxValue:
+                            maxValue = value
+                            #Quedarse con el maximo
+                            maxLabel = label
+                    if maxLabel != trainingLabels[i]:
+                        tao = self.newTao(self.weights[maxLabel], self.weights[trainingLabels[i]],trainingData[i])
+                        print("tao="+str(tao))
+                        nTao = min(tao,c)
+                        print(nTao)
+                        self.weights[maxLabel] -= self.multCounter(nTao,trainingData[i])
+                        self.weights[trainingLabels[i]] += self.multCounter(nTao,trainingData[i])
+
+            guesses = self.classify(validationData)
+            countguess=0
+            print(c)
+            print(len(guesses))
+            for i in range(len(guesses)):
+                if guesses[i] == validationLabels[i]:
+                    countguess +=1
+            print("bestVal ="+str(bestValidation))
+            print("count = "+str(countguess))
+            if bestValidation<countguess:
+                bestValidation = countguess
+                bestWeight = self.weights
+        self.weights = bestWeight
+
 
     def classify(self, data ):
         """
@@ -77,5 +131,3 @@ class MiraClassifier:
                 vectors[l] = self.weights[l] * datum
             guesses.append(vectors.argMax())
         return guesses
-
-
