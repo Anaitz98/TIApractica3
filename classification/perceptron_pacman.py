@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -28,7 +28,7 @@ class PerceptronClassifierPacman(PerceptronClassifier):
     def classify(self, data ):
         """
         Data contains a list of (datum, legal moves)
-        
+
         Datum is a Counter representing the features of each GameState.
         legalMoves is a list of legal moves for that GameState.
         """
@@ -45,9 +45,24 @@ class PerceptronClassifierPacman(PerceptronClassifier):
         self.features = trainingData[0][0]['Stop'].keys() # could be useful later
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
-
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
                 "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+                values, actions = trainingData[i]
+                for feat in self.features:
+                    maxLabel = -1
+                    maxValue = float("-inf")
+                    for action in actions:
+                        #Score (activacion) de la clase
+                        value = values[action][feat]*self.weights[feat]
+                        if value > maxValue:
+                            maxValue = value
+                            #Quedarse con el maximo
+                            maxLabel = action
+                    #Si correcto no cambiar
+                    if maxLabel != trainingLabels[i]:
+                        #Tunear los pesos
+                        self.weights[feat] -= values[trainingLabels[i]][feat]
+                    else:
+                        self.weights[feat] += values[trainingLabels[i]][feat]
