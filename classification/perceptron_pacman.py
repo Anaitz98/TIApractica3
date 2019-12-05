@@ -51,6 +51,7 @@ class PerceptronClassifierPacman(PerceptronClassifier):
                 "*** YOUR CODE HERE ***"
                 values, actions = trainingData[i]
                 for feat in self.features:
+                    print(self.weights[feat])
                     maxLabel = -1
                     maxValue = float("-inf")
                     for action in actions:
@@ -60,9 +61,8 @@ class PerceptronClassifierPacman(PerceptronClassifier):
                             maxValue = value
                             #Quedarse con el maximo
                             maxLabel = action
-                    #Si correcto no cambiar
+                    #Si es correcto  acercar y si es incorrecto alejar
                     if maxLabel != trainingLabels[i]:
-                        #Tunear los pesos
                         self.weights[feat] -= values[trainingLabels[i]][feat]
                     else:
                         self.weights[feat] += values[trainingLabels[i]][feat]
